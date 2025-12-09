@@ -1,31 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Star, Play, Pause, Square, TrendingUp } from 'lucide-react';
 
-const TodoApp = () => {
-  const [tasksByDate, setTasksByDate] = useState({});
-  const [inputValue, setInputValue] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-  const [isImportant, setIsImportant] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [editingText, setEditingText] = useState('');
-  const [currentDate, setCurrentDate] = useState('');
-  const [timers, setTimers] = useState({});
-
-  // Get current date in IST
-  const getCurrentDateIST = () => {
-    const now = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000;
-    const istTime = new Date(now.getTime() + istOffset);
-    return istTime.toISOString().split('T')[0];
-  };
-
-  // Initialize current date
-  useEffect(() => {
-    setCurrentDate(getCurrentDateIST());
-    
-    // Update date at midnight
-    const checkMidnight = setInterval(() => {
-      const newDate = getCurrentDateIST();
+const
       if (newDate !== currentDate) {
         setCurrentDate(newDate);
       }
@@ -56,216 +32,23 @@ const TodoApp = () => {
   // Save tasks to localStorage
   useEffect(() => {
     if (Object.keys(tasksByDate).length > 0) {
-      localStorage.setItem('tasksByDate', JSON.stringify(tasksByDate));
-    }
-  }, [tasksByDate]);
-
-  // Timer management
-  useEffect(() => {
-    const intervals = {};
-    
-    Object.keys(timers).forEach(taskId => {
-      if (timers[taskId].running) {
-        intervals[taskId] = setInterval(() => {
-          setTimers(prev => ({
-            ...prev,
-            [taskId]: {
-              ...prev[taskId],
-              elapsed: prev[taskId].elapsed + 1
-            }
-          }));
-        }, 1000);
-      }
-    });
-
-    return () => {
-      Object.values(intervals).forEach(interval => clearInterval(interval));
-    };
-  }, [timers]);
-
-  const formatElapsedTime = (seconds) => {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return {
-      hours: hrs.toString().padStart(2, '0'),
-      minutes: mins.toString().padStart(2, '0'),
-      seconds: secs.toString().padStart(2, '0')
-    };
-  };
-
-  const getTotalTimeForDate = (date) => {
-    if (!tasksByDate[date]) return 0;
-    
-    return tasksByDate[date].reduce((total, task) => {
-      return total + (timers[task.id]?.elapsed || 0);
-    }, 0);
-  };
-
-  const formatTotalTime = (seconds) => {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    
-    if (hrs > 0) {
-      return `${hrs}h ${mins}m`;
-    }
-    return `${mins}m`;
-  };
-
-  const startTimer = (taskId) => {
-    setTimers(prev => ({
-      ...prev,
-      [taskId]: prev[taskId] 
-        ? { ...prev[taskId], running: true }
-        : { elapsed: 0, running: true }
-    }));
-  };
-
-  const pauseTimer = (taskId) => {
-    setTimers(prev => ({
-      ...prev,
-      [taskId]: { ...prev[taskId], running: false }
-    }));
-  };
-
-  const stopTimer = (taskId) => {
-    setTimers(prev => {
-      const newTimers = { ...prev };
-      delete newTimers[taskId];
-      return newTimers;
-    });
-  };
-
+      l
   const handleAddTask = () => {
-    if (inputValue.trim() !== '') {
-      const newTask = {
-        id: Date.now(),
-        text: inputValue,
-        completed: false,
-        time: selectedTime,
-        important: isImportant
-      };
+   
 
-      setTasksByDate(prev => ({
-        ...prev,
-        [currentDate]: [...(prev[currentDate] || []), newTask]
-      }));
 
-      setInputValue('');
-      setSelectedTime('');
-      setIsImportant(false);
-    }
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleAddTask();
-    }
-  };
-
-  const toggleTaskCompletion = (date, id) => {
-    setTasksByDate(prev => ({
-      ...prev,
-      [date]: prev[date].map(task =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
-    }));
-  };
-
-  const deleteTask = (date, id) => {
-    setTasksByDate(prev => ({
-      ...prev,
-      [date]: prev[date].filter(task => task.id !== id)
-    }));
-    stopTimer(id);
-  };
-
-  const startEditing = (task) => {
-    setEditingId(task.id);
-    setEditingText(task.text);
-  };
-
-  const saveEdit = (date, id) => {
-    if (editingText.trim() !== '') {
-      setTasksByDate(prev => ({
-        ...prev,
-        [date]: prev[date].map(task =>
-          task.id === id ? { ...task, text: editingText } : task
-        )
-      }));
-    }
-    setEditingId(null);
-    setEditingText('');
-  };
-
-  const handleEditKeyPress = (e, date, id) => {
-    if (e.key === 'Enter') {
-      saveEdit(date, id);
-    } else if (e.key === 'Escape') {
-      setEditingId(null);
-      setEditingText('');
-    }
-  };
-
-  const formatDateHeader = (dateStr) => {
-    const date = new Date(dateStr + 'T00:00:00');
     const today = new Date(currentDate + 'T00:00:00');
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    if (dateStr === currentDate) {
-      return `Today - ${date.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
-    } else if (dateStr === yesterday.toISOString().split('T')[0]) {
-      return `Yesterday - ${date.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
-    } else {
-      return date.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    }
-  };
+    if 
 
-  const formatTime = (time24) => {
-    if (!time24) return 'No time set';
-    const [hour, min] = time24.split(':').map(Number);
-    const hourDisplay = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-    const period = hour >= 12 ? 'PM' : 'AM';
-    return `${hourDisplay}:${min.toString().padStart(2, '0')} ${period}`;
-  };
-
-  const sortedDates = Object.keys(tasksByDate).sort((a, b) => b.localeCompare(a));
-
-  return (
-    <div className="flex flex-col items-center min-h-screen bg-purple-100 p-4">
-      <div className="w-full max-w-3xl bg-white rounded-lg shadow-lg overflow-hidden border-t-4 border-green-400">
-        <div className="bg-purple-600 p-4 text-white">
-          <h1 className="text-2xl font-bold text-center">Daily To-Do List</h1>
-          <p className="text-center text-sm text-purple-200 mt-1">Time in IST (Indian Standard Time)</p>
-        </div>
-        
-        <div className="p-4">
-          <div className="bg-purple-50 p-4 rounded-lg mb-4 border border-purple-200">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Add a new task..."
               className="w-full p-2 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
             
-            <div className="flex flex-wrap gap-3 mb-3">
-              <div className="flex items-center gap-2 flex-grow">
-                <Clock className="text-purple-600" size={18} />
-                <input
-                  type="time"
-                  value={selectedTime}
-                  onChange={(e) => setSelectedTime(e.target.value)}
-                  className="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-              
-              <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded border border-gray-300 hover:bg-purple-50 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={isImportant}
+            <div 
                   onChange={(e) => setIsImportant(e.target.checked)}
                   className="h-4 w-4 text-purple-600 rounded focus:ring-purple-500"
                 />
